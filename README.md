@@ -7,7 +7,7 @@ Library for allowing android device to commuicate with Droid Manager via Wi-Fi t
 Screenshots
 ===========
 
-![alt tag](https://raw.github.com/Omar/DroidManagerWiFi/master/Screenshots/Android Progress.png)
+![](https://raw2.github.com/OmarBizreh/DroidManagerWifi/master/Screenshots/AndroidProgress.png)
 
 
-![alt tag](https://raw.github.com/Omar/DroidManagerWiFi/master/Screenshots/Windows Progress.png)
+![](https://raw2.github.com/OmarBizreh/DroidManagerWifi/master/Screenshots/WindowsProgress.png)
