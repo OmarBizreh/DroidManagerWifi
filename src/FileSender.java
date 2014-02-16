@@ -9,8 +9,34 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import android.os.AsyncTask;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 public class FileSender extends AsyncTask<String, Integer, String> {
+
+	public FileSender() {
+		this.ConstructorFlag = 0;
+	}
+
+	public FileSender(TextView txtProgress, String Message) {
+		this.ConstructorFlag = 1;
+		this.ProgressMessage = Message;
+		this.txtProgress = txtProgress;
+	}
+
+	public FileSender(TextView txtProgress, ProgressBar barProgress,
+			String Message) {
+		this.ConstructorFlag = 2;
+		this.txtProgress = txtProgress;
+		this.barProgress = barProgress;
+		this.ProgressMessage = Message;
+	}
+
+	private int ConstructorFlag;
+	private Socket socket;
+	private String ProgressMessage;
+	private TextView txtProgress;
+	private ProgressBar barProgress;
 
 	private String SourceIP = "", SourceFileName = "";
 	private int intFileSize = 0, bytesSent = 0;
@@ -28,7 +54,7 @@ public class FileSender extends AsyncTask<String, Integer, String> {
 			 */
 			SourceIP = params[0];
 
-			Socket socket = new Socket(SourceIP, 8000);
+			socket = new Socket(SourceIP, 8000);
 			try {
 				for (int i = 1; i < params.length; i++) {
 					SourceFileName = params[i];
@@ -125,16 +151,18 @@ public class FileSender extends AsyncTask<String, Integer, String> {
 	}
 
 	@Override
-	protected void onPostExecute(String result) {
-	}
-
-	@Override
-	protected void onPreExecute() {
-	}
-
-	@Override
 	protected void onProgressUpdate(Integer... values) {
-
+		switch (this.ConstructorFlag) {
+		case 1:
+			txtProgress.setText(this.ProgressMessage + values[0]);
+			break;
+		case 2:
+			txtProgress.setText(this.ProgressMessage + values[0]);
+			barProgress.setProgress(values[0]);
+			break;
+		default:
+			break;
+		}
 	}
 
 }
