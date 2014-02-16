@@ -1,3 +1,5 @@
+package droidmanager.wifi;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -14,17 +16,45 @@ public class FileReceiver extends AsyncTask<String, Integer, String> {
 	private String ProgressMessage;
 	private TextView txtProgress;
 	private ProgressBar barProgress;
+	private StringBuilder strReceivedFilesPath;
 
+	/**
+	 * Default constructor, calling it will result in receiving a file and not
+	 * showing any progress. This is useful if receiving files is to be done on
+	 * a IntentService where only the result is what we care about.
+	 */
 	public FileReceiver() {
 		this.ConstructorFlag = 0;
 	}
 
+	/**
+	 * Calling this constructor will result in showing a predefined message with
+	 * receive progress in a TextView.
+	 * 
+	 * @param txtProgress
+	 *            TextView to show custom message and progress.
+	 * @param Message
+	 *            Custom message to show to user before showing amount of bytes
+	 *            received
+	 */
 	public FileReceiver(TextView txtProgress, String Message) {
 		this.ConstructorFlag = 1;
 		this.ProgressMessage = Message;
 		this.txtProgress = txtProgress;
 	}
 
+	/**
+	 * Calling this constructor will result in showing a predefined message with
+	 * receive progress in a TextView and ProgressBar
+	 * 
+	 * @param txtProgress
+	 *            TextView to show custom message and amount of bytes received
+	 * @param barProgress
+	 *            ProgressBar to show receiving progress
+	 * @param Message
+	 *            Custom message to show to user before showing amount of bytes
+	 *            received
+	 */
 	public FileReceiver(TextView txtProgress, ProgressBar barProgress,
 			String Message) {
 		this.ConstructorFlag = 2;
@@ -33,6 +63,17 @@ public class FileReceiver extends AsyncTask<String, Integer, String> {
 		this.ProgressMessage = Message;
 	}
 
+	/**
+	 * Receives the file(s) and return strReceivedFilesPath which contains path
+	 * on device of received files. <br>
+	 * Depending on the first byte sent by Droid Manager this function will be
+	 * able to know if it's going to receive a file or folder. <br>
+	 * strReceivedFilesPath: It's a string builder which appends paths of
+	 * received files, it can be read line by line using the following code
+	 * snippet: <br>
+	 * BufferedReader reader = new BufferedReader(new
+	 * StringReader(strReceivedFilesPath)); reader.readLine();
+	 */
 	@Override
 	protected String doInBackground(String... params) {
 		// TODO Auto-generated method stub
@@ -70,6 +111,9 @@ public class FileReceiver extends AsyncTask<String, Integer, String> {
 			for (int i = 0; i < bytes; i++) {
 				FinalFlag[i] = flag[i];
 			}
+
+			strReceivedFilesPath = new StringBuilder();
+
 			if (String.valueOf(FinalFlag).equals("0")) {
 				// DestinationAddress is chosen by the user.
 				ReceiveFile(params[1]);
@@ -81,10 +125,22 @@ public class FileReceiver extends AsyncTask<String, Integer, String> {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
-		return null;
+		return strReceivedFilesPath.toString();
 	}
 
-	public void ReceiveFolders(String DestinationAddress) {
+	/**
+	 * Called when Droid Manager tells the app it's going to receive folder
+	 * contents. All files received using this function will have the same
+	 * parent folder. (i.e. user is sending a folder: C:\TempFolder\1.txt <br>
+	 * the file "1.txt" will be saved on the device on /sdcard/TempFolder/1.txt
+	 * 
+	 * @param DestinationAddress
+	 *            Address of which the files will be saved
+	 * 
+	 * @throws LowMemoryException
+	 */
+	public void ReceiveFolders(String DestinationAddress)
+			throws LowMemoryException {
 		try {
 			/*
 			 * Read folder information which contains the following: 1. Folder
@@ -156,7 +212,14 @@ public class FileReceiver extends AsyncTask<String, Integer, String> {
 
 			strFileName = "/" + strFileName;
 
+			if (android.os.Environment.getExternalStorageDirectory()
+					.getFreeSpace() != intFileSize) {
+				throw new LowMemoryException();
+			}
+
 			path += strFileName;
+
+			strReceivedFilesPath.append(path);
 
 			File ReceivedFile = new File(path);
 
@@ -186,6 +249,12 @@ public class FileReceiver extends AsyncTask<String, Integer, String> {
 		}
 	}
 
+	/**
+	 * Called when Droid Manager tells the app it's going to receive a file
+	 * 
+	 * @param DestinationAddress
+	 *            Path of which the file will be saved
+	 */
 	public void ReceiveFile(String DestinationAddress) {
 		try {
 			InputStreamReader inStream = new InputStreamReader(
@@ -213,6 +282,9 @@ public class FileReceiver extends AsyncTask<String, Integer, String> {
 			int receivedBytes = 0;
 			strFileName = "/" + strFileName;
 			String path = DestinationAddress + strFileName;
+
+			strReceivedFilesPath.append(path);
+
 			File ReceivedFile = new File(path);
 			ReceivedFile.createNewFile();
 			FileOutputStream fout = new FileOutputStream(ReceivedFile);
@@ -241,6 +313,9 @@ public class FileReceiver extends AsyncTask<String, Integer, String> {
 
 	}
 
+	/**
+	 * Shows receive progress to corresponding controls.
+	 */
 	@Override
 	protected void onProgressUpdate(Integer... values) {
 		switch (this.ConstructorFlag) {

@@ -1,3 +1,5 @@
+package droidmanager.wifi;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,17 +15,44 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class FileSender extends AsyncTask<String, Integer, String> {
-	
+
+	/**
+	 * Using this constructor will result in sending file(s) without showing any
+	 * progress to user. This is useful if sending files is to be done on a
+	 * IntentService where only the result is what we care about.
+	 */
 	public FileSender() {
 		this.ConstructorFlag = 0;
 	}
 
+	/**
+	 * Calling this constructor will result in showing a predefined message with
+	 * receive progress in a TextView.
+	 * 
+	 * @param txtProgress
+	 *            TextView to show custom message and progress.
+	 * @param Message
+	 *            Custom message to show to user before showing amount of bytes
+	 *            received
+	 */
 	public FileSender(TextView txtProgress, String Message) {
 		this.ConstructorFlag = 1;
 		this.ProgressMessage = Message;
 		this.txtProgress = txtProgress;
 	}
 
+	/**
+	 * Calling this constructor will result in showing a predefined message with
+	 * receive progress in a TextView and ProgressBar
+	 * 
+	 * @param txtProgress
+	 *            TextView to show custom message and amount of bytes received
+	 * @param barProgress
+	 *            ProgressBar to show receiving progress
+	 * @param Message
+	 *            Custom message to show to user before showing amount of bytes
+	 *            received
+	 */
 	public FileSender(TextView txtProgress, ProgressBar barProgress,
 			String Message) {
 		this.ConstructorFlag = 2;
@@ -38,10 +67,18 @@ public class FileSender extends AsyncTask<String, Integer, String> {
 	private TextView txtProgress;
 	private ProgressBar barProgress;
 
-	private String SourceIP = "", SourceFileName = "";
+	private String DestinationIP = "", SourceFileName = "";
 	private int intFileSize = 0, bytesSent = 0;
 	private PrintWriter stringOutputStream = null;
 
+	/**
+	 * Sends selected file(s) to computer. "params" array must contain the
+	 * following:<br>
+	 * 1. IP Address of destination (computer)<br>
+	 * 2. Absolute path of file(s) to be sent.
+	 * 
+	 * 
+	 */
 	@Override
 	protected String doInBackground(String... params) {
 		// TODO Auto-generated method stub
@@ -52,9 +89,9 @@ public class FileSender extends AsyncTask<String, Integer, String> {
 			 * params array. The rest of the array elements are path of files to
 			 * be sent to computer. [Currently folder sending is not supported].
 			 */
-			SourceIP = params[0];
+			DestinationIP = params[0];
 
-			socket = new Socket(SourceIP, 8000);
+			socket = new Socket(DestinationIP, 8000);
 			try {
 				for (int i = 1; i < params.length; i++) {
 					SourceFileName = params[i];
@@ -150,6 +187,10 @@ public class FileSender extends AsyncTask<String, Integer, String> {
 		return null;
 	}
 
+	/**
+	 * Shows send progress either on TextView only or on both TextView and
+	 * ProgressBar depending on which constructor you will be calling.
+	 */
 	@Override
 	protected void onProgressUpdate(Integer... values) {
 		switch (this.ConstructorFlag) {
@@ -165,4 +206,8 @@ public class FileSender extends AsyncTask<String, Integer, String> {
 		}
 	}
 
+	@Override
+	protected void onPostExecute(String result) {
+		
+	}
 }
