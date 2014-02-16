@@ -21,6 +21,11 @@ public class FileSender extends AsyncTask<String, Integer, String> {
 		// TODO Auto-generated method stub
 
 		try {
+			/*
+			 * Destination IP Address is provided as the first element in the
+			 * params array. The rest of the array elements are path of files to
+			 * be sent to computer. [Currently folder sending is not supported].
+			 */
 			SourceIP = params[0];
 
 			Socket socket = new Socket(SourceIP, 8000);
