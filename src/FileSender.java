@@ -13,7 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class FileSender extends AsyncTask<String, Integer, String> {
-
+	
 	public FileSender() {
 		this.ConstructorFlag = 0;
 	}

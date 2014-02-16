@@ -9,6 +9,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class FileReceiver extends AsyncTask<String, Integer, String> {
+	private int ConstructorFlag;
+	private Socket socket;
+	private String ProgressMessage;
+	private TextView txtProgress;
+	private ProgressBar barProgress;
 
 	public FileReceiver() {
 		this.ConstructorFlag = 0;
@@ -27,12 +32,6 @@ public class FileReceiver extends AsyncTask<String, Integer, String> {
 		this.barProgress = barProgress;
 		this.ProgressMessage = Message;
 	}
-
-	private int ConstructorFlag;
-	private Socket socket;
-	private String ProgressMessage;
-	private TextView txtProgress;
-	private ProgressBar barProgress;
 
 	@Override
 	protected String doInBackground(String... params) {
@@ -173,7 +172,7 @@ public class FileReceiver extends AsyncTask<String, Integer, String> {
 				receivedBytes += b;
 
 				publishProgress((receivedBytes % intFileSize));
-				
+
 				if (receivedBytes == intFileSize || isCancelled()) {
 					break;
 				}
@@ -256,5 +255,4 @@ public class FileReceiver extends AsyncTask<String, Integer, String> {
 			break;
 		}
 	}
-
 }
